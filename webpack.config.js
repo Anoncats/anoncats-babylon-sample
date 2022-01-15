@@ -1,6 +1,7 @@
 const path = require("path");
 const fs = require("fs");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const appDirectory = fs.realpathSync(process.cwd());
 
 module.exports = {
@@ -33,7 +34,17 @@ module.exports = {
     new HtmlWebpackPlugin({
       inject: true,
       template: path.resolve(appDirectory, "public/index.html"),
-    })
+    }),
+    new CopyWebpackPlugin({
+      patterns: [{ 
+        from: path.resolve(appDirectory, "public"),
+        globOptions: {
+          ignore: [
+            "**/index.html"
+          ]
+        }
+      }]
+  })
   ],
   mode: "development",
 };
