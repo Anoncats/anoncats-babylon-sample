@@ -4,6 +4,7 @@ import "@babylonjs/loaders/glTF";
 import { 
   Engine, 
   Scene, 
+  SceneLoader,
   ArcRotateCamera, 
   Vector3, 
   HemisphericLight, 
@@ -12,7 +13,7 @@ import {
 } from "@babylonjs/core";
 import * as GUI from "@babylonjs/gui";
 import { ethers } from "ethers";
-import {connectToInjectedProvider} from "./utils";
+import anoncatsABI from "./data/anoncatsABI";
 
 /*
  * Setup Canvas
@@ -32,6 +33,7 @@ var isConnected = false;
 var provider;
 var signer;
 var account;
+var anoncats;
 
 /*
  * Setup Scene
@@ -39,7 +41,7 @@ var account;
 const createScene = () : Scene => {
   const scene = new Scene(engine);
 
-  const camera = new ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2.5, 15, new Vector3(0, 0, 0), scene);
+  const camera = new ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2.5, 4, new Vector3(0, 0, 0), scene);
   camera.attachControl(canvas, true);
   const light = new HemisphericLight("light", new Vector3(1, 1, 0), scene);
 
@@ -72,11 +74,28 @@ const createScene = () : Scene => {
     (window as any).ethereum.enable().then(res => {
       account = res[0];
       provider = new ethers.providers.Web3Provider((window as any).ethereum);
-      signer = provider.getSigner;
+      signer = provider.getSigner();
       advancedTexture.removeControl(connectButton);
       advancedTexture.addControl(accountText);
       isConnected = true;
       accountText.text = account;
+
+      // get anoncat if it exists
+      anoncats = new ethers.Contract(
+        "0xe7141C205a7a74241551dAF007537A041867e0B0",
+        anoncatsABI,
+        signer
+      );
+
+      anoncats.tokenOfOwnerByIndex(account, 0).then(tokenId => {
+        SceneLoader.Append("models/anoncats/" ,`cat ${tokenId}.glb`, scene, function(scene) {
+          camera.alpha += Math.PI;
+        });
+      }).catch(err => {
+        console.log(err);
+        alert("You don't have an Anoncat!");
+      })
+      
     });
   })
   advancedTexture.addControl(connectButton);

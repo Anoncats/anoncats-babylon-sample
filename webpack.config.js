@@ -9,7 +9,7 @@ module.exports = {
     filename: "js/bundleName.js", //name for the javascript file that is created/compiled in memory
   },
   resolve: {
-    extensions: [".tsx", ".ts", ".js"],
+    extensions: [".tsx", ".ts", ".js", "json"],
   },
   devServer: {
     host: "0.0.0.0",
